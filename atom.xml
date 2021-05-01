@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://zsybh1.github.io</id>
     <title>zsybh1&apos;s Blog</title>
-    <updated>2021-04-26T12:50:18.886Z</updated>
+    <updated>2021-05-01T04:50:55.547Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://zsybh1.github.io"/>
     <link rel="self" href="https://zsybh1.github.io/atom.xml"/>
@@ -11,12 +11,52 @@
     <icon>https://zsybh1.github.io/favicon.ico</icon>
     <rights>All rights reserved 2021, zsybh1&apos;s Blog</rights>
     <entry>
-        <title type="html"><![CDATA[这是一个测试博文]]></title>
-        <id>https://zsybh1.github.io/post/zhe-shi-yi-ge-ce-shi-bo-wen/</id>
-        <link href="https://zsybh1.github.io/post/zhe-shi-yi-ge-ce-shi-bo-wen/">
+        <title type="html"><![CDATA[MASM中的局部变量使用]]></title>
+        <id>https://zsybh1.github.io/post/masm-zhong-de-ju-bu-bian-liang-shi-yong/</id>
+        <link href="https://zsybh1.github.io/post/masm-zhong-de-ju-bu-bian-liang-shi-yong/">
         </link>
-        <updated>2021-04-26T12:49:32.000Z</updated>
-        <content type="html"><![CDATA[<p>测试内容</p>
+        <updated>2021-05-01T04:49:19.000Z</updated>
+        <content type="html"><![CDATA[<p>在masm的子程序中，可以通过local伪指令来定义局部变量。而当局部变量涉及到指针和数组的时候，变量的使用方式会有些许的差别。</p>
+<p>对于指针和数组，当我们要取其中的元素的时候，在C中有两种方式：</p>
+<pre><code class="language-c">p[i];
+*(p+i)
+</code></pre>
+<p>对应到masm就是：</p>
+<pre><code class="language-assembly">p[ecx*4]
+[p+ecx*4]
+</code></pre>
+<p>现在我们定义：</p>
+<pre><code class="language-assembly">local vec[5]:dword
+local list:ptr dword
+</code></pre>
+<p>如果我们使用<code>vec[ecx*4]</code>可以正常获得相当于C中<code>vec[i]</code>的值，但是如果向<code>list[ecx*4]</code>进行写入，轻则破坏vec数组的数据，重则破坏栈区结构。</p>
+<p>同时我们也会注意到，如果采用下面的方式调用数组数据：</p>
+<pre><code class="language-assembly">mov esi, vec
+mov edi, list
+mov eax, [edi+ecx*4]
+add eax, [esi+ecx*4]
+</code></pre>
+<p>第三句可以正常赋值，第四句却多半会报错</p>
+<hr>
+<p>实际上，vec，list这种符号本身，是<strong>栈区</strong>对应变量的<strong>地址</strong>。按照正常使用方式，需要<code>[vec]</code>和<code>[list]</code>才能取得栈区的变量本身，但是在masm中，如果符号单独出现，会直接翻译成带中括号形式。例如，上面的1、2句会翻译为</p>
+<pre><code class="language-assembly">mov esi, dword ptr [vec]
+mov edi, dword ptr [list]
+</code></pre>
+<p>在这种情况下再分析上面的语句。</p>
+<p>vec是一个存放在栈区的数组，所以<code>[vec]</code>对应的就是<code>vec[0]</code>数据本身，而<code>vec[ecx*4]</code>即<code>[vec+ecx*4]</code>本质上就是<code>vec[0]</code>的栈区地址加上<code>ecx*4</code>大小的偏移，可以正常找到<code>vec[i]</code>的数据；而<code>[esi+ecx*4]</code>相当于把<code>vec[0]</code>当做地址，在此基础上加上<code>ecx*4</code>大小的偏移，显然会导致非法访存。</p>
+<p>list是一个存放在堆区的数组，<code>[list]</code>的值是放在<strong>栈区</strong>的堆区数组首地址，而<code>list[ecx*4]</code>即<code>[list+ecx*4]</code>表示的是<code>list</code>的<strong>栈区地址</strong>加上<code>[ecx*4]</code>的偏移，显然这个值还是停留在栈区，并且可能破坏栈区的数据。而<code>[edi+ecx*4]</code>中的<code>edi</code>即<code>[list]</code>表示的是堆区数组的首地址，再加上<code>ecx*4</code>并寻址就可以取得<code>list[i]</code>的正确数据。</p>
+<hr>
+<p>另外这里还有一点要注意，按照定义，<code>mov eax, [[list]]</code>应当可以得到list[0]的值，但是实际使用中这句话依然会被翻译成<code>mov eax, dword ptr [list]</code>，因此还是需要将[list]单独保存在一个寄存器中再取地址</p>
+<hr>
+<p>综上，当我们在masm中取普通数组和指针数组的元素时，应当以如下的方法</p>
+<pre><code class="language-assembly">local vec[5]:dword
+local list:ptr dword
+...
+mov ecx, 3
+mov eax, vec[ecx*4]
+mov edx, list
+add eax, [edx+ecx*4]
+</code></pre>
 ]]></content>
     </entry>
 </feed>
