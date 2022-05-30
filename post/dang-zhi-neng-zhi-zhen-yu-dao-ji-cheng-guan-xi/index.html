@@ -5,14 +5,14 @@
     
 <meta charset="utf-8" >
 
-<title>当智能指针遇到继承关系 | zsybh1&#39;s Blog</title>
+<title> Windows Vcpkg+Cmake环境配置 | zsybh1&#39;s Blog</title>
 <meta name="description" content="没什么好看的XD">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
 
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-<link rel="shortcut icon" href="https://zsybh1.github.io/favicon.ico?v=1653877098487">
+<link rel="shortcut icon" href="https://zsybh1.github.io/favicon.ico?v=1653877418336">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://zsybh1.github.io/styles/main.css">
 
@@ -30,7 +30,7 @@
   <div class="site-header">
     <div class="left">
       <a href="https://zsybh1.github.io">
-        <img class="avatar" src="https://zsybh1.github.io/images/avatar.png?v=1653877098487" alt="" width="32px" height="32px">
+        <img class="avatar" src="https://zsybh1.github.io/images/avatar.png?v=1653877418336" alt="" width="32px" height="32px">
       </a>
       <a href="https://zsybh1.github.io">
         <h1 class="site-title">zsybh1&#39;s Blog</h1>
@@ -80,41 +80,90 @@
       <div class="content-container">
         <div class="post-detail">
           
-          <h2 class="post-title">当智能指针遇到继承关系</h2>
+          <h2 class="post-title"> Windows Vcpkg+Cmake环境配置</h2>
           <div class="post-info post-detail-info">
-            <span><i class="icon-calendar-outline"></i> 2022-05-30</span>
+            <span><i class="icon-calendar-outline"></i> 2021-05-23</span>
             
           </div>
           <div class="post-content">
-            <p>经常遇到智能指针和继承关系相关的问题，在这篇文章里对代码中遇到的相关的问题和常用的解决方法进行一下记录</p>
-<h4 id="子类指针赋值传参到父类指针">子类指针赋值/传参到父类指针</h4>
-<p>智能指针具有和普通指针相同的特性，即子类指针可以直接赋值/传参到父类指针上</p>
-<pre><code class="language-cpp">std::shared_ptr&lt;Base&gt; p = std::make_shared&lt;Derived&gt;();
+            <p>近期有使用各种第三方库进行C++开发的需求，鉴于以前有过自己编译第三方库的经历，遇到了不少问题，花了很多时间才解决，于是这次就考虑学习使用包管理工具vcpkg</p>
+<h3 id="安装">安装</h3>
+<p>vcpkg的使用需要VS2015Update3以上，且必须安装<strong>英文语言包</strong>，如果没有需要在vs_installer中进行安装，否则后面vcpkg使用时会出错</p>
+<p>在powershell中执行以下指令</p>
+<pre><code class="language-bash"># 下载源文件
+git clone https://github.com/Microsoft/vcpkg.git
+cd vcpkg
+# 安装
+.\bootstrap-vcpkg.bat
 </code></pre>
-<p>同时，父类智能指针支持传入子类普通指针</p>
-<pre><code class="language-cpp">std::shared_ptr&lt;Base&gt; p(new Derived());
+<p>为了使用上的方便，可以考虑在系统变量中增加一个条目指向vcpkg的目录（如VCPKG_DIR），然后在PATH中引用它</p>
+<p>执行集成指令：</p>
+<pre><code class="language-bash">vcpkg integrate install
 </code></pre>
-<p>如果出现报错，检查子类是否正确继承了父类</p>
-<h4 id="判断父类指针中指向的类型">判断父类指针中指向的类型</h4>
-<pre><code class="language-cpp">typeid(*pointer) == typeid(Derived);	// 方法1，适用于普通指针和智能指针
-std::dynamic_cast&lt;Derived&gt;(pointer) != nullptr;	// 方法2-1，适用普通指针
-std::dynamic_pointer_cast&lt;Derived&gt;(pointer) != nullptr;// 方法2-2，适用智能指针
+<p>这个命令执行后，所有VS原生的C++项目都可以像使用标准库一样使用第三方库。注意这句话执行后下面会跳出来一句</p>
+<pre><code class="language-bash">CMake projects should use: &quot;-DCMAKE_TOOLCHAIN_FILE=(your path to vcpkg)/scripts/buildsystems/vcpkg.cmake&quot;
 </code></pre>
-<p>如果只是单纯比较类型，方法1要比方法2更快<a href="https://www.itdaan.com/blog/2013/07/19/b432851aa92359f4e09e897cfb117472.html"><sup>[1]</sup></a>，如果后续需要用到转换后的子类指针，则可能后者更快（待测）。</p>
-<p>注意此处方法1中出现本应为真却返回假的情况，或者方法2中报错，请检查<strong>父类中是否有虚函数</strong>。</p>
+<p>复制这个路径，后面使用Cmake时会需要用到</p>
+<p>如果不想集成vcpkg到所有vs工程，可以使用</p>
+<pre><code class="language-bash">vcpkg integrate remove
+</code></pre>
+<p>来取消集成。如果此时想要用到vcpkg的库，可以使用</p>
+<pre><code class="language-bash">vcpkg integrate project
+</code></pre>
+<p>来集成到特定的项目，具体操作并没有进行尝试，而且也不是本文的重点</p>
+<h3 id="用vcpkg管理第三方包">用vcpkg管理第三方包</h3>
+<p>查找第三方包</p>
+<pre><code class="language-bash">vcpkg search [package_name]
+</code></pre>
+<p>安装第三方包：</p>
+<pre><code class="language-bash">vcpkg install &lt;package_name&gt;[:triplet]
+# 例
+vcpkg install opencv:x64-windows
+</code></pre>
+<p>注意这个triplet，可以使用<code>vcpkg help triplet</code>查看所有支持的架构。如果不填写架构，在windows上默认安装的是x86-windows，这是适用于msvc编译器和32位程序的架构，如果想要64位，或者想用比如mingw编译器开发，就需要指定别的架构，如x64-mingw-static</p>
+<p>移除第三方包：</p>
+<pre><code class="language-bash">vcpkg remove &lt;package_name&gt;[:triplet]
+</code></pre>
+<p>查看所有安装的第三方包</p>
+<pre><code class="language-bash">vcpkg list
+</code></pre>
+<p>更多的操作可以自行查看vcpkg的命令列表</p>
+<h3 id="在vs的cmake项目中使用vcpkg">在VS的Cmake项目中使用vcpkg</h3>
+<p>一个使用vcpkg的CmakeLists.txt范例</p>
+<pre><code class="language-cmake">cmake_minimum_required(VERSION 3.10)
+
+# 如果没有定义环境变量，把路径写全，也可以用前面集成时复制的那一句
+set(CMAKE_TOOLCHAIN_FILE &quot;$ENV{VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake&quot;)
+
+project(main)
+
+set(CMAKE_CXX_STANDARD 17)
+
+find_package(OpenCV REQUIRED)
+
+include_directories(&quot;$ENV{VCPKG_DIR}/installed/x64-windows/include&quot;)
+
+add_executable(main main.cpp)
+target_link_libraries(main PRIVATE ${OpenCV_LIBS})
+</code></pre>
+<p>如果前面将vcpkg继承到了vs中，就不需要写set cmake_toolchain_file这一行，vs会自己定位</p>
+<p>find_package后面写想要添加的库名字，可以有智能提示，可以用鼠标移上去查看引入这个库需要的其它设置：</p>
+<figure data-type="image" tabindex="1"><img src="https://raw.githubusercontent.com/zsybh1/ImageBed/master/img/20210523102742.png" alt="image-20210523102733097" loading="lazy"></figure>
+<p>其中target_include_directories可以不写，因为vcpkg中所有头文件都在一起，一个include_directories就可以引用到所有头文件</p>
+<p>如果find_package报错，提示需要xxxConfig.cmake，那就表明工具链没有被正确设置，检查一下路径是否正确然后项目-Cmake缓存-删除缓存，再重新生成即可</p>
+<p>如果需要编译release版本，项目-Cmake设置，新建一个x64-release配置（或者其他release），配置类型改为Release即可</p>
+<p>以上工作完成后，就可以愉快地开始写代码了</p>
+<h3 id="在vscode的cmake项目中使用vcpkg">在VSCode的Cmake项目中使用vcpkg</h3>
+<p>CmakeLists.txt的设置和前面vs一致，注意在vscode中不能删除set cmake_toolchain_file这一行。Cmake的toolkit要选择msvc，如果想使用clang或mingw需要在vcpkg下载包的时候就选择别的架构</p>
+<p>VSCode中find_package没有智能提示，所以即使选择在VSCode环境下进行开发也更推荐使用vs进行CmakeLists.txt的编辑</p>
+<p>如果出现头文件错误，按F1输入Configuration，找到C/C++Configuration，找到包含路径，将include_directories里的完整路径复制进去即可</p>
+<p>如果出现find_package错误，同样是检查toolchain的配置，然后<strong>删除缓存</strong>再重新生成</p>
+<p>想要使用Release模式，左下角找到CMake:[Debug]:Ready，点击改成Release即可</p>
 
           </div>
         </div>
 
         
-          <div class="next-post">
-            <a class="purple-link" href="https://zsybh1.github.io/post/windows-vcpkgcmake-huan-jing-pei-zhi/">
-              <h3 class="post-title">
-                下一篇： Windows Vcpkg+Cmake环境配置
-              </h3>
-            </a>
-          </div>
-          
       </div>
 
       

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://zsybh1.github.io</id>
     <title>zsybh1&apos;s Blog</title>
-    <updated>2022-05-30T02:20:00.881Z</updated>
+    <updated>2022-05-30T02:23:43.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://zsybh1.github.io"/>
     <link rel="self" href="https://zsybh1.github.io/atom.xml"/>
@@ -11,11 +11,11 @@
     <icon>https://zsybh1.github.io/favicon.ico</icon>
     <rights>All rights reserved 2022, zsybh1&apos;s Blog</rights>
     <entry>
-        <title type="html"><![CDATA[当智能指针遇到继承关系]]></title>
-        <id>https://zsybh1.github.io/post/dang-zhi-neng-zhi-zhen-yu-dao-ji-cheng-guan-xi/</id>
-        <link href="https://zsybh1.github.io/post/dang-zhi-neng-zhi-zhen-yu-dao-ji-cheng-guan-xi/">
+        <title type="html"><![CDATA[当智能指针遇上继承关系]]></title>
+        <id>https://zsybh1.github.io/post/dang-zhi-neng-zhi-zhen-yu-shang-ji-cheng-guan-xi/</id>
+        <link href="https://zsybh1.github.io/post/dang-zhi-neng-zhi-zhen-yu-shang-ji-cheng-guan-xi/">
         </link>
-        <updated>2022-05-30T01:59:17.000Z</updated>
+        <updated>2022-05-30T02:21:08.000Z</updated>
         <content type="html"><![CDATA[<p>经常遇到智能指针和继承关系相关的问题，在这篇文章里对代码中遇到的相关的问题和常用的解决方法进行一下记录</p>
 <h4 id="子类指针赋值传参到父类指针">子类指针赋值/传参到父类指针</h4>
 <p>智能指针具有和普通指针相同的特性，即子类指针可以直接赋值/传参到父类指针上</p>
@@ -36,12 +36,12 @@ std::dynamic_pointer_cast&lt;Derived&gt;(pointer) != nullptr;// 方法2-2，适�
     </entry>
     <entry>
         <title type="html"><![CDATA[ Windows Vcpkg+Cmake环境配置]]></title>
-        <id>https://zsybh1.github.io/post/windows-vcpkgcmake-huan-jing-pei-zhi/</id>
-        <link href="https://zsybh1.github.io/post/windows-vcpkgcmake-huan-jing-pei-zhi/">
+        <id>https://zsybh1.github.io/post/dang-zhi-neng-zhi-zhen-yu-dao-ji-cheng-guan-xi/</id>
+        <link href="https://zsybh1.github.io/post/dang-zhi-neng-zhi-zhen-yu-dao-ji-cheng-guan-xi/">
         </link>
-        <updated>2021-05-23T02:46:27.000Z</updated>
+        <updated>2021-05-23T11:23:13.000Z</updated>
         <content type="html"><![CDATA[<p>近期有使用各种第三方库进行C++开发的需求，鉴于以前有过自己编译第三方库的经历，遇到了不少问题，花了很多时间才解决，于是这次就考虑学习使用包管理工具vcpkg</p>
-<h2 id="安装">安装</h2>
+<h3 id="安装">安装</h3>
 <p>vcpkg的使用需要VS2015Update3以上，且必须安装<strong>英文语言包</strong>，如果没有需要在vs_installer中进行安装，否则后面vcpkg使用时会出错</p>
 <p>在powershell中执行以下指令</p>
 <pre><code class="language-bash"># 下载源文件
@@ -65,7 +65,7 @@ cd vcpkg
 <pre><code class="language-bash">vcpkg integrate project
 </code></pre>
 <p>来集成到特定的项目，具体操作并没有进行尝试，而且也不是本文的重点</p>
-<h2 id="用vcpkg管理第三方包">用vcpkg管理第三方包</h2>
+<h3 id="用vcpkg管理第三方包">用vcpkg管理第三方包</h3>
 <p>查找第三方包</p>
 <pre><code class="language-bash">vcpkg search [package_name]
 </code></pre>
@@ -82,7 +82,7 @@ vcpkg install opencv:x64-windows
 <pre><code class="language-bash">vcpkg list
 </code></pre>
 <p>更多的操作可以自行查看vcpkg的命令列表</p>
-<h2 id="在vs的cmake项目中使用vcpkg">在VS的Cmake项目中使用vcpkg</h2>
+<h3 id="在vs的cmake项目中使用vcpkg">在VS的Cmake项目中使用vcpkg</h3>
 <p>一个使用vcpkg的CmakeLists.txt范例</p>
 <pre><code class="language-cmake">cmake_minimum_required(VERSION 3.10)
 
