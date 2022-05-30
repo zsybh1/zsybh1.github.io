@@ -1,10 +1,11 @@
 
+<!DOCTYPE html>
 <html>
   <head>
     
 <meta charset="utf-8" >
 
-<title>zsybh1&#39;s Blog</title>
+<title>当智能指针遇到继承关系 | zsybh1&#39;s Blog</title>
 <meta name="description" content="没什么好看的XD">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -77,48 +78,46 @@
 
 
       <div class="content-container">
-        
-        
-<section class="post-item">
-    <div class="content">
-      <a href="https://zsybh1.github.io/post/dang-zhi-neng-zhi-zhen-yu-dao-ji-cheng-guan-xi/">
-        <h2 class="post-title">当智能指针遇到继承关系</h2>
-      </a>
-      <div class="post-abstract">
-        
-      </div>
-      <div class="post-info">
-        <span><i class="icon icon-calendar-outline"></i> 2022-05-30</span>
-        
-      </div>
-    </div>
-    
-  </section>
+        <div class="post-detail">
+          
+          <h2 class="post-title">当智能指针遇到继承关系</h2>
+          <div class="post-info post-detail-info">
+            <span><i class="icon-calendar-outline"></i> 2022-05-30</span>
+            
+          </div>
+          <div class="post-content">
+            <p>经常遇到智能指针和继承关系相关的问题，在这篇文章里对代码中遇到的相关的问题和常用的解决方法进行一下记录</p>
+<h4 id="子类指针赋值传参到父类指针">子类指针赋值/传参到父类指针</h4>
+<p>智能指针具有和普通指针相同的特性，即子类指针可以直接赋值/传参到父类指针上</p>
+<pre><code class="language-cpp">std::shared_ptr&lt;Base&gt; p = std::make_shared&lt;Derived&gt;();
+</code></pre>
+<p>同时，父类智能指针支持传入子类普通指针</p>
+<pre><code class="language-cpp">std::shared_ptr&lt;Base&gt; p(new Derived());
+</code></pre>
+<p>如果出现报错，检查子类是否正确继承了父类</p>
+<h4 id="判断父类指针中指向的类型">判断父类指针中指向的类型</h4>
+<pre><code class="language-cpp">typeid(*pointer) == typeid(Derived);	// 方法1，适用于普通指针和智能指针
+std::dynamic_cast&lt;Derived&gt;(pointer) != nullptr;	// 方法2-1，适用普通指针
+std::dynamic_pointer_cast&lt;Derived&gt;(pointer) != nullptr;// 方法2-2，适用智能指针
+</code></pre>
+<p>如果只是单纯比较类型，方法1要比方法2更快<a href="https://www.itdaan.com/blog/2013/07/19/b432851aa92359f4e09e897cfb117472.html"><sup>[1]</sup></a>，如果后续需要用到转换后的子类指针，则可能后者更快（待测）。</p>
+<p>注意此处方法1中出现本应为真却返回假的情况，或者方法2中报错，请检查<strong>父类中是否有虚函数</strong>。</p>
 
-<section class="post-item">
-    <div class="content">
-      <a href="https://zsybh1.github.io/post/windows-vcpkgcmake-huan-jing-pei-zhi/">
-        <h2 class="post-title"> Windows Vcpkg+Cmake环境配置</h2>
-      </a>
-      <div class="post-abstract">
+          </div>
+        </div>
+
         
+          <div class="next-post">
+            <a class="purple-link" href="https://zsybh1.github.io/post/windows-vcpkgcmake-huan-jing-pei-zhi/">
+              <h3 class="post-title">
+                下一篇： Windows Vcpkg+Cmake环境配置
+              </h3>
+            </a>
+          </div>
+          
       </div>
-      <div class="post-info">
-        <span><i class="icon icon-calendar-outline"></i> 2021-05-23</span>
-        
-      </div>
-    </div>
-    
-  </section>
 
-
-<div class="pagination-container">
-  
-  
-</div>
-
-
-      </div>
+      
 
       <div class="site-footer">
   <div class="slogan">没什么好看的XD</div>
